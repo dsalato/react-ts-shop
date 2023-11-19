@@ -1,26 +1,41 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, {useEffect, useState} from 'react';
+import Product from "./components/Product";
+import ProductModal from "./components/ProductModal";
+import {IProduct} from "./models";
+import axios from "axios";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const App = () => {
+    const [products, setProducts] = useState<IProduct[]>([]);
+    const [product, setProduct] = useState<IProduct>()
+    const [modal, setModal] = useState(false);
+
+    const viewModal = (product: IProduct) => {
+        setModal(!modal);
+        setProduct(product);
+    }
+
+    useEffect(() => {
+        const getProducts = async () => {
+            try {
+                const {data} = await axios.get<IProduct[]>(`https://fakestoreapi.com/products`);
+                setProducts(data);
+
+            } catch (e) {
+                console.log(e);
+            }
+        }
+        getProducts();
+    }, [])
+
+    return (
+        <div className='container mx-auto max-w-2xl pt-5'>
+            {products?.map((el) => (
+                <Product viewModal={viewModal} product={el} key={el.id}/>
+            ))}
+            {modal && product && <ProductModal setModal={setModal} product={product}/>}
+
+        </div>
+    );
 }
 
 export default App;
